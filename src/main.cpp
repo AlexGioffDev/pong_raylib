@@ -19,7 +19,7 @@ int main()
     Menu menu = MenuCreate();
 
     Paddle playerPaddle = PaddleCreate(30, GetScreenHeight() / 2 - 50, 300, 60, 300);
-    Paddle aiPaddle = PaddleCreate(GetScreenWidth() - 90, GetScreenHeight() / 2 - 50, 450, 60, 300);
+    Paddle aiPaddle = PaddleCreate(GetScreenWidth() - 90, GetScreenHeight() / 2 - 50, 300, 60, 300);
 
     Ball ball = BallCreate(GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f, 30);
     ScoreBoard scoreboad = ScoreBoardInit();

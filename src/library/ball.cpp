@@ -25,14 +25,15 @@ BallEvent BallUpdate(Ball &ball, float deltatime, float screenHeight, Rectangle 
     {
         ball.dirX = 1.0f;
         ball.pos.x = playerX + playerRect.width + ball.ratios;
-        ball.speed *= 1.5;
+        ball.speed *= 1.1f;
+        if(ball.speed > 900.0f) ball.speed = 900.0f;
     }
 
     if (CheckCollisionCircleRec(ball.pos, ball.ratios, pcRect))
     {
         ball.dirX = -1.0f;
         ball.pos.x = pcX - ball.ratios;
-        ball.speed *= 1.5;
+        ball.speed *= 1.1f;
     }
 
     if (ball.pos.y - ball.ratios < 0)
@@ -49,13 +50,11 @@ BallEvent BallUpdate(Ball &ball, float deltatime, float screenHeight, Rectangle 
 
     if (ball.pos.x - ball.ratios < 0)
     {
-        ball.dirX *= -1;
         return BallEvent::PC_SCORE;
     }
 
     if (ball.pos.x + ball.ratios > GetScreenWidth())
     {
-        ball.dirX *= -1;
         return BallEvent::PLAYER_SCORE;
     }
 
@@ -70,4 +69,8 @@ void BallReset(Ball &ball)
     ball.pos.x = GetScreenWidth() / 2.0f;
     ball.pos.y = GetScreenHeight() / 2.0f;
     ball.speed = 450.0f;
+
+    ball.dirX *= -1.0f;
+    ball.dirY = (GetRandomValue(0, 1) == 0) ? 1.0f : -1.0f;
+
 }
