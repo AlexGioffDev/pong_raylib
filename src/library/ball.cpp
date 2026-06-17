@@ -1,4 +1,5 @@
 #include "ball.hpp"
+#include <cmath>
 
 Ball BallCreate(float x, float y, float ratio)
 {
@@ -23,40 +24,52 @@ BallEvent BallUpdate(Ball &ball, float deltatime, float screenHeight, Rectangle 
 {
     if (CheckCollisionCircleRec(ball.pos, ball.ratios, playerRect))
     {
+        float paddleCenterY = playerRect.y + playerRect.height / 2.0f;
+        float hitFactor = (ball.pos.y - paddleCenterY) / (playerRect.height / 2.0f);
+        
         ball.dirX = 1.0f;
+        ball.dirY = hitFactor; 
+
+        float length = std::sqrt(ball.dirX * ball.dirX + ball.dirY * ball.dirY);
+        ball.dirX /= length;
+        ball.dirY /= length;
+
         ball.pos.x = playerX + playerRect.width + ball.ratios;
-        ball.speed *= 1.1f;
-        if(ball.speed > 900.0f) ball.speed = 900.0f;
+        ball.speed *= 1.15f; 
+        if(ball.speed > 1100.0f) ball.speed = 1100.0f;
     }
 
     if (CheckCollisionCircleRec(ball.pos, ball.ratios, pcRect))
     {
+        float paddleCenterY = pcRect.y + pcRect.height / 2.0f;
+        float hitFactor = (ball.pos.y - paddleCenterY) / (pcRect.height / 2.0f);
+        
         ball.dirX = -1.0f;
+        ball.dirY = hitFactor;
+
+        float length = std::sqrt(ball.dirX * ball.dirX + ball.dirY * ball.dirY);
+        ball.dirX /= length;
+        ball.dirY /= length;
+
         ball.pos.x = pcX - ball.ratios;
-        ball.speed *= 1.1f;
+        ball.speed *= 1.15f;
+        if(ball.speed > 1100.0f) ball.speed = 1100.0f; // Cap per l'IA aggiunto
     }
 
     if (ball.pos.y - ball.ratios < 0)
     {
-        ball.dirY = 1.0f;
+        ball.dirY = std::abs(ball.dirY); 
         ball.pos.y = ball.ratios;
     }
 
     if (ball.pos.y + ball.ratios > screenHeight)
     {
-        ball.dirY = -1.0f;
+        ball.dirY = -std::abs(ball.dirY);
         ball.pos.y = screenHeight - ball.ratios;
     }
 
-    if (ball.pos.x - ball.ratios < 0)
-    {
-        return BallEvent::PC_SCORE;
-    }
-
-    if (ball.pos.x + ball.ratios > GetScreenWidth())
-    {
-        return BallEvent::PLAYER_SCORE;
-    }
+    if (ball.pos.x - ball.ratios < 0) return BallEvent::PC_SCORE;
+    if (ball.pos.x + ball.ratios > GetScreenWidth()) return BallEvent::PLAYER_SCORE;
 
     ball.pos.x += ball.dirX * ball.speed * deltatime;
     ball.pos.y += ball.dirY * ball.speed * deltatime;
