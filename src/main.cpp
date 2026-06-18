@@ -2,10 +2,8 @@
 #include "raylib.h"
 #include "game_state.hpp"
 #include "main_menu.hpp"
-#include "paddle.hpp"
-#include "ball.hpp"
-#include "Scoreboard.hpp"
-
+#include "game_over.hpp"
+#include "game.hpp"
 
 int main()
 {
@@ -17,14 +15,9 @@ int main()
     App app;
     app.game = STATE_MENU;
     Menu menu = MenuCreate();
-
-    Paddle playerPaddle = PaddleCreate(30, GetScreenHeight() / 2 - 50, 300, 60, 300);
-    Paddle aiPaddle = PaddleCreate(GetScreenWidth() - 90, GetScreenHeight() / 2 - 50, 450, 60, 300);
-
-    Ball ball = BallCreate(GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f, 30);
-    ScoreBoard scoreboad = ScoreBoardInit();
-
-
+    Menu gameOver = GameOverMenuCreate();
+    Game game = GameCreate(GetScreenWidth(), GetScreenHeight());
+    Winner winner = Winner::NONE;
 
     while (!WindowShouldClose() && app.game != STATE_QUIT)
     {
@@ -33,32 +26,36 @@ int main()
         switch (app.game)
         {
         case STATE_MENU:
+        {
+            GAME_STATE prev = app.game;
             MenuUpdate(menu, app);
+            if (prev != app.game && app.game == STATE_GAME)
+            {
+                GameReset(game, GetScreenWidth(), GetScreenHeight());
+            }
             break;
-
+        }
         case STATE_GAME:
         {
             float deltaTime = GetFrameTime();
-            PaddleUpdatePlayer(playerPaddle, deltaTime, GetScreenHeight());
-            PaddleUpdateAI(aiPaddle, ball.pos.y, ball.dirX,deltaTime, GetScreenHeight());
+            GameUpdate(game, deltaTime, GetScreenHeight(), GetScreenWidth());
 
-            Rectangle playerRect = {playerPaddle.position.x, playerPaddle.position.y, playerPaddle.width, playerPaddle.height};
-            Rectangle aiRect = {aiPaddle.position.x, aiPaddle.position.y, aiPaddle.width, aiPaddle.height};
-
-            BallEvent ballEvent = BallUpdate(ball, deltaTime, GetScreenHeight(), playerRect, aiRect, playerPaddle.position.x, aiPaddle.position.x);
-
-            if (ballEvent == BallEvent::PLAYER_SCORE)
+            if (GameIsOver(game))
             {
-                ScoreUser(scoreboad);
-                BallReset(ball);
+                winner = GameGetWinner(game);
+                app.game = STATE_GAMEOVER;
             }
 
-            if (ballEvent == BallEvent::PC_SCORE)
+            break;
+        }
+        case STATE_GAMEOVER:
+        {
+            GAME_STATE prev = app.game;
+            GameOverUpdate(gameOver, app);
+            if (prev != app.game && app.game == STATE_GAME)
             {
-                ScorePc(scoreboad);
-                BallReset(ball);
+                GameReset(game, GetScreenWidth(), GetScreenHeight());
             }
-
             break;
         }
         case STATE_QUIT:
@@ -78,11 +75,12 @@ int main()
         case STATE_GAME:
         {
             ClearBackground(BLACK);
-            ScoreBoardDraw(scoreboad);
-            DrawText("Press ESC to close the game", GetScreenWidth() - MeasureText("Press ESCO To close the game", 14), GetScreenHeight() - 40, 14, RAYWHITE);
-            PaddleDraw(playerPaddle);
-            PaddleDraw(aiPaddle);
-            BallDraw(ball);
+            GameDraw(game, GetScreenHeight(), GetScreenWidth());
+            break;
+        }
+        case STATE_GAMEOVER:
+        {
+            GameOverDraw(gameOver, winner);
             break;
         }
         case STATE_QUIT:
@@ -91,9 +89,6 @@ int main()
 
         EndDrawing();
     }
-
-    // Eventuale cleanup
-    // MenuDestroy(menu);
 
     CloseWindow();
     return 0;

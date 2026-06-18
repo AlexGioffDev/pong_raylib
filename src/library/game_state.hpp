@@ -4,6 +4,7 @@ enum GAME_STATE
 {
     STATE_MENU,
     STATE_GAME,
+    STATE_GAMEOVER,
     STATE_QUIT
 };
 

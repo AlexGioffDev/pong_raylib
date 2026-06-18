@@ -53,7 +53,7 @@ BallEvent BallUpdate(Ball &ball, float deltatime, float screenHeight, Rectangle 
 
         ball.pos.x = pcX - ball.ratios;
         ball.speed *= 1.15f;
-        if(ball.speed > 1100.0f) ball.speed = 1100.0f; // Cap per l'IA aggiunto
+        if(ball.speed > 1100.0f) ball.speed = 1100.0f; 
     }
 
     if (ball.pos.y - ball.ratios < 0)
